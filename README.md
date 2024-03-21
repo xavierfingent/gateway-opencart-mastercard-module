@@ -1,20 +1,16 @@
 # Mastercard Payment Gateway Services  for OpenCart
-
 This plugin adds Mastercard Payment Gateway Services as a payment option on your OpenCart checkout page.
 
 ## System Requirments
-
 The latest release of the plugin has the following system requirements:
 
 - PHP version 8.0 or higher is mandatory.
 - OpenCart version 4.0.2.3 or later is required. However, we strongly recommend using the latest available version of OpenCart for optimal performance.
 
 ## Documentation
-
 Click here to access the documentation: https://mpgs.fingent.wiki/target/opencart-mastercard-payment-gateway-services/installation/
 
 ## Support
-
 For customer support: https://mpgsfgs.atlassian.net/servicedesk/customer/portals
 
 ## Compatibility

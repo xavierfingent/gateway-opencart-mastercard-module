@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file.
 ## [1.3.1] - 2024-20-03
 ### Updated
 - Updated Mastercard API Version to 78.
-
 ### Enhancements
 - Implemented a notification feature to alert the OpenCart administrator whenever a new version is launched on GitHub.
 
