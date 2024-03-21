@@ -26,6 +26,10 @@ Version v1.3.0
 - Added Refund Option.
 - Added Partial Refund Option.
 
+Version v1.3.1
+- Implemented a notification feature to alert the opencart administrator whenever a new version is launched on GitHub.
+- Updated Mastercard API Version to 78.
+
 ## Installation
 1. Make a backup of your site before applying new mods etc.
 2. Go to Admin → Extensions → Installer and upload the downloaded .ocmod.zip file.
