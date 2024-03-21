@@ -19,16 +19,16 @@ For customer support: https://mpgsfgs.atlassian.net/servicedesk/customer/portals
 
 ## Compatibility
 
+Version v1.3.1
+- Implemented a notification feature to alert the opencart administrator whenever a new version is launched on GitHub.
+- Updated Mastercard API Version to 78.
+
 Version v1.3.0
 - Enhanced Compatibility: Compatible with PHP 8.1 & Opencart 4.0.2.x (tested with v4.0.2.3).
 - Updated Mastercard API Version to 73.
 - Added Payment Capture Option.
 - Added Refund Option.
 - Added Partial Refund Option.
-
-Version v1.3.1
-- Implemented a notification feature to alert the opencart administrator whenever a new version is launched on GitHub.
-- Updated Mastercard API Version to 78.
 
 ## Installation
 1. Make a backup of your site before applying new mods etc.
