@@ -21,6 +21,13 @@
       <div class="version-info">
         <div class="module-version"><strong>{{ entry_module_version }}</strong> <span>{{ module_version }}</span></div>
         <div class="api-version"><strong>{{ entry_api_version }}</strong> <span>{{ api_version }}</span></div>
+        
+        {% if latest_version > module_version %}
+          <div class="alert alert-warning alert-dismissible module-notification-wrapper">
+            <i class="fa-solid fa-circle-exclamation"></i> Warning: {{ update_message }} 
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endif %}
     </div>
     
     </div>
@@ -115,7 +122,7 @@
                 <label for="send-line-items" class="col-sm-2 col-form-label">{{ entry_send_line_items }}</label>
                 <div class="col-sm-10">
                     <select name="payment_mastercard_send_line_items" id="send-line-items" class="form-select">
-                      {% if payment_mastercard_saved_cards %}
+                      {% if payment_mastercard_send_line_items %}
                         <option value="1" selected="selected">{{ text_yes }}</option>
                         <option value="0">{{ text_no }}</option>
                     {% else %}
