@@ -24,10 +24,10 @@ class Mastercard extends \Opencart\System\Engine\Model {
     const API_ASIA = 'api_ap';
     const API_MTF = 'api_mtf';
     const API_OTHER = 'api_other';
-    const MODULE_VERSION = '1.3.0';
-    const API_VERSION = '73';
+    const MODULE_VERSION = '1.3.1';
+    const API_VERSION = '78';
     const DEBUG_LOG_FILENAME = 'mpgs_gateway.log';
-    const THREEDS_API_VERSION = '1.3.0';
+    const THREEDS_API_VERSION = '1.3.1';
         
     /**
      * getMethods
@@ -37,7 +37,7 @@ class Mastercard extends \Opencart\System\Engine\Model {
      */
     public function getMethods(array $address = []): array {
 
-        // loading example payment language
+        // loading mastercard payment language
         $this->load->language('extension/mastercard/payment/mastercard');
 
         if ($this->cart->hasSubscription()) {
@@ -46,11 +46,11 @@ class Mastercard extends \Opencart\System\Engine\Model {
             $status = false;
         } elseif (!$this->config->get('config_checkout_payment_address')) {
             $status = true;
-        } elseif (!$this->config->get('payment_example_payment_geo_zone_id')) {
+        } elseif (!$this->config->get('mastercard_payment_geo_zone_id')) {
             $status = true;
         } else {
             // getting payment data using zeo zone
-            $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone` WHERE `geo_zone_id` = '" . (int)$this->config->get('payment_example_payment_geo_zone_id') . "' AND `country_id` = '" . (int)$address['country_id'] . "' AND (`zone_id` = '" . (int)$address['zone_id'] . "' OR `zone_id` = '0')");
+            $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone` WHERE `geo_zone_id` = '" . (int)$this->config->get('mastercard_payment_geo_zone_id') . "' AND `country_id` = '" . (int)$address['country_id'] . "' AND (`zone_id` = '" . (int)$address['zone_id'] . "' OR `zone_id` = '0')");
 
             // if the rows found the status set to True
             if ($query->num_rows) {
@@ -94,9 +94,7 @@ class Mastercard extends \Opencart\System\Engine\Model {
     public function getGatewayUri()
     {
 
-
         $gatewayUrl = ''; // Initialize $gatewayUrl before the conditional statements
-    
         $apiGateway = $this->config->get('payment_mastercard_api_gateway');
         if ($apiGateway === self::API_AMERICA) {
             $gatewayUrl = 'https://na-gateway.mastercard.com/';
@@ -115,8 +113,6 @@ class Mastercard extends \Opencart\System\Engine\Model {
             }
             $gatewayUrl = $url;
         }
-
-       
         return $gatewayUrl;
     }
     
@@ -126,7 +122,6 @@ class Mastercard extends \Opencart\System\Engine\Model {
      */
     public function getApiUri()
     {
-       
         return $this->getGatewayUri() . 'api/rest/version/' . $this->getApiVersion() . '/merchant/' . $this->getMerchantId();
     }
 
@@ -234,18 +229,12 @@ class Mastercard extends \Opencart\System\Engine\Model {
     public function apiRequest($method, $uri, $data = [])
     {
         $userId = 'merchant.' . $this->getMerchantId();
-
         $requestLog = 'Send Request: "' . $method . ' ' . $uri . '" ';
-
-        
         if (!empty($data)) {
             $requestLog .= json_encode(['request' => $data]);
           
         }
         $this->log($requestLog);
-
-
-
         $curl = curl_init();
         switch ($method){
             case 'POST':
@@ -273,7 +262,6 @@ class Mastercard extends \Opencart\System\Engine\Model {
         $responseText = 'Receive Response: "' . $httpResponseCode . '" for the request: "' . $method . ' ' . $uri . '" ';
         $responseText .= json_encode(['response' => json_decode($output)]);
         $this->log($responseText);
-
         return json_decode($output, true);
     }
 
@@ -285,7 +273,6 @@ class Mastercard extends \Opencart\System\Engine\Model {
         unset($this->session->data['mpgs_hosted_checkout']);
         unset($this->session->data['mpgs_hosted_session']);
         unset($this->session->data['mpgs_hosted_checkout']['successIndicator']);
-
     }
 
     /**

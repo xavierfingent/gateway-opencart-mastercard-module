@@ -62,19 +62,27 @@ class Mastercard extends \Opencart\System\Engine\Controller
             } 
         }
         if ($integrationModel === 'hostedcheckout') {
-            $checkout_session_id =json_decode($data['configured_variables']);
-            $data['session_id'] = $checkout_session_id->session->id;
-            $data['merchant'] = $checkout_session_id->merchant;
-            $data['version'] = $checkout_session_id->session->version;
-            $data['mgps_order_id'] = $this->getOrderPrefix($this->session->data['order_id']);
-            $data['order_id'] = $this->session->data['order_id'];
-            $data['success_indicator'] = $this->session->data['mpgs_hosted_checkout']['successIndicator'];
-            $data['OCSESSID'] = $_COOKIE['OCSESSID'];
-            $jsonData = json_encode($data);
-            $data['jsonData'] = $jsonData;
-            setcookie('OCSESSID', $data['OCSESSID'], time() + 24 * 3600, '/');
-            return $this->load->view('extension/mastercard/payment/mgps_hosted_checkout', $data);
-        }
+            if (isset($data['configured_variables'])) {
+                $checkout_session_id = json_decode($data['configured_variables']);
+        
+                if ($checkout_session_id && isset($checkout_session_id->session, $checkout_session_id->merchant)) {
+                    $data['session_id'] = $checkout_session_id->session->id;
+                    $data['merchant'] = $checkout_session_id->merchant;
+                    $data['version'] = isset($checkout_session_id->session->version) ? $checkout_session_id->session->version : null;
+                    $data['mgps_order_id'] = $this->getOrderPrefix($this->session->data['order_id']);
+                    $data['order_id'] = $this->session->data['order_id'];
+        
+                    if (isset($this->session->data['mpgs_hosted_checkout']['successIndicator'])) {
+                        $data['success_indicator'] = $this->session->data['mpgs_hosted_checkout']['successIndicator'];
+                    } 
+                    $data['OCSESSID'] = $_COOKIE['OCSESSID'];
+                    $jsonData = json_encode($data);
+                    $data['jsonData'] = $jsonData;
+                    setcookie('OCSESSID', $data['OCSESSID'], time() + 24 * 3600, '/');
+                    return $this->load->view('extension/mastercard/payment/mgps_hosted_checkout', $data);
+                }
+            }
+        }           
     }
 
     /**
@@ -101,7 +109,6 @@ class Mastercard extends \Opencart\System\Engine\Controller
         $this->model_extension_mastercard_payment_mastercard->clearCheckoutSession();
         $order = $this->getOrder();
         $txnId = uniqid(sprintf('%s-', $order['id']));
-        $notificationUrl = "example.com";
         $requestData = [
             'apiOperation' => 'INITIATE_CHECKOUT',
             'partnerSolutionId' => $this->model_extension_mastercard_payment_mastercard->buildPartnerSolutionId(),
@@ -173,6 +180,7 @@ class Mastercard extends \Opencart\System\Engine\Controller
      * @return array
      */
     protected function getOrderItemsTaxAndTotals(){
+    	    $this->load->helper('utf8');
             $orderData = [];
             $sendLineItems = $this->config->get('payment_mastercard_send_line_items');
             if ($sendLineItems) {

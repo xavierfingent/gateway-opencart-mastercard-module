@@ -35,3 +35,7 @@ span.img_loading_captureButton .capture_Spinner {
 .action_wrapper {
     margin-top: 15px;
 }
+
+.version-info .module-notification-wrapper{
+    margin-top: 10px;
+}

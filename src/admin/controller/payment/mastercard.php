@@ -19,8 +19,8 @@ use Opencart\Admin\Model\Extension\MasterCard\Payment;
 
 class MasterCard extends \Opencart\System\Engine\Controller {
     
-    const API_VERSION = '73';
-    const MODULE_VERSION = '1.3.0';
+    const API_VERSION = '78';
+    const MODULE_VERSION = '1.3.1';
     const API_AMERICA = 'api_na';
     const API_EUROPE = 'api_eu';
     const API_ASIA = 'api_ap';
@@ -44,7 +44,13 @@ class MasterCard extends \Opencart\System\Engine\Controller {
         $this->load->language('extension/mastercard/payment/mastercard');
         $this->load->model('extension/mastercard/payment/mastercard');
         $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->addStyle('../extension/mastercard/admin/view/stylesheet/mastercard.css');
         $this->load->model('setting/setting');
+        $latestVersion = $this->getLatestGitHubVersion();
+        $data['latest_version'] =  $latestVersion ;
+        $currentVersion = "";
+        $data['update_message'] = $this->compareVersions($latestVersion, $currentVersion);
+
         if (($this->request->server['REQUEST_METHOD'] == 'POST' )&& $this->validate()) {
             $this->model_setting_setting->editSetting('payment_mastercard', $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
@@ -239,6 +245,11 @@ class MasterCard extends \Opencart\System\Engine\Controller {
         } else {
             $data['payment_mastercard_risk_declined_status_id'] = $this->config->get('payment_mastercard_risk_declined_status_id') ? : '8';
         }
+
+        // echo "<pre>";
+        // print_r($data);
+        // echo "</pre>";
+        // die();
         $this->load->model('localisation/order_status');
         $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
         $data['header'] = $this->load->controller('common/header');
@@ -701,10 +712,7 @@ class MasterCard extends \Opencart\System\Engine\Controller {
                
                 if ($transaction['type'] === 'Captured' || 'CAPTURED' && $transaction['oc_order_id'] === $this->request->post['order_id']) {
                     $capture_amount = $transaction['amount'];
-                    $capture_transaction_id = $transaction['transaction_id'];
-
-               
-                    
+                    $capture_transaction_id = $transaction['transaction_id']; 
                 }
             }
             $comment = $this->language->get('text_refund_sucess');
@@ -718,7 +726,6 @@ class MasterCard extends \Opencart\System\Engine\Controller {
             $mailEngine = $this->config->get('config_mail_engine');
             $smtpHostname = $this->config->get('config_mail_smtp_hostname');
             $smtpPort = $this->config->get('config_mail_smtp_port');
-        
             $url =  $this->getCaptureUri() . 'api/rest/version/' . self::API_VERSION . '/merchant/' . $merchant_id . '/order/' . $capture_order_id . '/transaction/' . $newTxnId ;
             $requestData = [
                 'apiOperation' => 'REFUND',
@@ -766,8 +773,6 @@ class MasterCard extends \Opencart\System\Engine\Controller {
             );
             $this->response->setOutput(json_encode($json));
         }
-        
-
     }
 
     public function RequestPartialRefund() {
@@ -786,7 +791,6 @@ class MasterCard extends \Opencart\System\Engine\Controller {
                     $capture_transaction_id = $transaction['transaction_id']; 
                 }
             }
-           
             $capture_amount  = $this->request->post['amount'];
             $api_version = self::API_VERSION;
             $refund_status_id = $this->model_extension_mastercard_payment_mastercard->getOrderStatusIdByName("Refunded");
@@ -859,17 +863,17 @@ class MasterCard extends \Opencart\System\Engine\Controller {
     }
 
     public function save(): void {
-        $this->load->language('extension/example_payment/payment/example_payment');
+        $this->load->language('extension/mastercard/payment/mastercard');
         $json = [];
         // checking file modification permission
-        if (!$this->user->hasPermission('modify', 'extension/example_payment/payment/example_payment')) {
+        if (!$this->user->hasPermission('modify', 'extension/mastercard/payment/mastercard')) {
             $json['error']['warning'] = $this->language->get('error_permission');
         }
 
         if (!$json) {
             $this->load->model('setting/setting');
 
-            $this->model_setting_setting->editSetting('payment_example_payment', $this->request->post);
+            $this->model_setting_setting->editSetting('payment_mastercard', $this->request->post);
 
             $json['success'] = $this->language->get('text_success');
         }
@@ -878,4 +882,41 @@ class MasterCard extends \Opencart\System\Engine\Controller {
         $this->response->setOutput(json_encode($json));
     }
 
+    private function getLatestGitHubVersion() {
+        $owner = 'fingent-corp';
+        $repo = 'gateway-opencart-mastercard-module';
+        $url = "https://api.github.com/repos/{$owner}/{$repo}/releases/latest";
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mastercard');
+        $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            return null; 
+        }
+        curl_close($ch);
+        $data = json_decode($response, true);
+    
+        if (isset($data['tag_name'])) {
+            return $data['tag_name'];
+        } else {
+            return null; 
+        }
+    }
+    
+    private function compareVersions($latestVersion, $currentVersion) {
+        $owner = 'fingent-corp';
+        $repo = 'gateway-opencart-mastercard-module';
+        $downloadLink = "https://github.com/{$owner}/{$repo}/releases/latest";
+        $releaseNotesLink = "https://mpgs.fingent.wiki/target/opencart-mastercard-payment-gateway-services/release-notes/";
+        
+        if ($latestVersion !== null && version_compare($latestVersion, $currentVersion, '>')) {
+            $message = "A new version ({$latestVersion}) of the module is now available! Please refer to the <a href='{$releaseNotesLink}' target='_blank'>Release Notes</a> section for information about its compatibility and features.";
+            return $message;
+        }
+    
+        return null;
+    }
+
+    
 }
